@@ -1,0 +1,6 @@
+{
+  "name": "AudioShield Forensics",
+  "description": "AI-Powered Forensic Deepfake Audio Detection (M.Tech Thesis Research Prototype)",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
