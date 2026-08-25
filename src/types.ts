@@ -156,6 +156,7 @@ export interface ModelRegistryItem {
 }
 
 export type NavigationTab =
+  | 'quick'
   | 'dashboard'
   | 'cases'
   | 'evidence'

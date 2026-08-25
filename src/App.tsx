@@ -37,9 +37,12 @@ import { ExperimentsView } from './components/ExperimentsView';
 import { ModelsView } from './components/ModelsView';
 import { ResearchView } from './components/ResearchView';
 import { SettingsView } from './components/SettingsView';
+import { GoogleSheetsModal } from './components/GoogleSheetsModal';
+import { QuickDetectorView } from './components/QuickDetectorView';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('quick');
+  const [isSimpleMode, setIsSimpleMode] = useState<boolean>(true);
 
   // Persistent State
   const [cases, setCases] = useState<Case[]>(() => loadCases());
@@ -48,6 +51,7 @@ export default function App() {
   const [analyses, setAnalyses] = useState<AnalysisResult[]>(() => loadAnalyses());
   const [chainEvents, setChainEvents] = useState<ChainEvent[]>(() => loadChainEvents());
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>(() => loadAuditLogs());
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState<boolean>(false);
 
   // Backend Health & Model Diagnostics
   const [health, setHealth] = useState<HealthStatus>({
@@ -194,12 +198,13 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#05070a] text-slate-300 flex flex-col font-sans overflow-hidden selection:bg-cyan-500 selection:text-slate-950">
+    <div className="h-screen w-screen bg-slate-900 text-slate-200 flex flex-col font-sans overflow-hidden selection:bg-cyan-500 selection:text-slate-950">
       {/* Global Forensic Header */}
       <Header
         health={health}
         modelStatus={modelStatus}
         onNavigateToSettings={() => setActiveTab('settings')}
+        onOpenGoogleSheets={() => setIsSheetsModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -212,10 +217,25 @@ export default function App() {
           activeCaseId={activeCaseId}
           onSelectCase={setActiveCaseId}
           isDemoMode={!health.isLiveBackend || modelStatus.inferenceMode === 'DEMONSTRATION'}
+          isSimpleMode={isSimpleMode}
+          onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
         />
 
-        {/* View Content Workspace with Geometric Balance Radial Gradient */}
-        <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,_#0a121d_0%,_#05070a_40%)] p-2 sm:p-4 md:p-6">
+        {/* View Content Workspace with High-Contrast Slate Background */}
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 p-3 sm:p-5 md:p-6 text-slate-100">
+          {activeTab === 'quick' && (
+            <QuickDetectorView
+              activeCase={activeCase}
+              evidenceList={evidenceList}
+              analyses={analyses}
+              onAddEvidence={handleAddEvidence}
+              onAddAnalysis={handleAddAnalysis}
+              onNavigate={setActiveTab}
+              isSimpleMode={isSimpleMode}
+              onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
+            />
+          )}
+
           {activeTab === 'dashboard' && (
             <DashboardView
               cases={cases}
@@ -284,6 +304,7 @@ export default function App() {
               analyses={analyses}
               chainEvents={chainEvents}
               auditLogs={auditLogs}
+              onOpenGoogleSheets={() => setIsSheetsModalOpen(true)}
             />
           )}
 
@@ -303,15 +324,26 @@ export default function App() {
         </main>
       </div>
 
-      {/* Geometric Balance Theme Footer */}
-      <footer className="h-8 bg-black border-t border-cyan-900/40 flex items-center justify-between px-6 shrink-0 text-[9px] font-mono text-slate-600">
+      {/* Modern High-Contrast Footer */}
+      <footer className="h-8 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-6 shrink-0 text-[10px] font-mono text-slate-400">
         <div>AUDIOSHIELD_FW_V2.0.4 :: SESSION_UID_7281-ADX</div>
-        <div className="flex gap-4 font-bold uppercase tracking-wider text-slate-500">
+        <div className="flex gap-4 font-semibold uppercase tracking-wider text-slate-400">
           <span>Integrity: 100%</span>
           <span>API Latency: 24ms</span>
-          <span className="text-cyan-800">Research Prototype Mode</span>
+          <span className="text-cyan-400">Research Prototype Mode</span>
         </div>
       </footer>
+
+      {/* Google Sheets Export Modal */}
+      <GoogleSheetsModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+        activeCase={activeCase}
+        evidenceList={evidenceList}
+        analyses={analyses}
+        chainEvents={chainEvents}
+        auditLogs={auditLogs}
+      />
     </div>
   );
 }

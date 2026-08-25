@@ -1,6 +1,6 @@
 import React from 'react';
 import { Case, EvidenceMetadata, AnalysisResult, ChainEvent, AuditEntry } from '../types';
-import { FileText, Printer, Download, ShieldCheck, AlertTriangle, Lock } from 'lucide-react';
+import { FileText, Printer, Download, ShieldCheck, AlertTriangle, Lock, FileSpreadsheet } from 'lucide-react';
 
 interface ForensicReportsProps {
   activeCase: Case;
@@ -8,6 +8,7 @@ interface ForensicReportsProps {
   analyses: AnalysisResult[];
   chainEvents: ChainEvent[];
   auditLogs: AuditEntry[];
+  onOpenGoogleSheets?: () => void;
 }
 
 export const ForensicReportsView: React.FC<ForensicReportsProps> = ({
@@ -15,7 +16,8 @@ export const ForensicReportsView: React.FC<ForensicReportsProps> = ({
   evidenceList,
   analyses,
   chainEvents,
-  auditLogs
+  auditLogs,
+  onOpenGoogleSheets
 }) => {
   const caseEvidence = evidenceList.find((e) => e.caseId === activeCase?.id) || evidenceList[0];
   const caseAnalysis = analyses.find((a) => a.caseId === activeCase?.id) || analyses[0];
@@ -73,6 +75,15 @@ export const ForensicReportsView: React.FC<ForensicReportsProps> = ({
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
+          {onOpenGoogleSheets && (
+            <button
+              onClick={onOpenGoogleSheets}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 font-bold text-xs shadow-lg transition-all cursor-pointer"
+              title="Export case data to Google Sheets spreadsheet"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Export to Google Sheets
+            </button>
+          )}
           <button
             onClick={handleDownloadJSON}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-800/80 hover:border-cyan-500 font-bold text-xs shadow-lg transition-all cursor-pointer"
@@ -234,19 +245,29 @@ export const ForensicReportsView: React.FC<ForensicReportsProps> = ({
           <div className="p-4 rounded-xl bg-slate-950/80 border border-cyan-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1 text-xs font-sans">
               <div className="font-bold text-slate-200 font-mono">
-                ISO/IEC 27037 Compliant JSON Evidence Archive
+                ISO/IEC 27037 Compliant JSON & Google Sheets Evidence Archive
               </div>
               <p className="text-slate-400 text-[11px]">
                 Includes complete case metadata, evidence specifications, model inference results, full chain of custody log ({caseChain.length} events), and audit trails ({auditLogs.filter(a => a.caseId === activeCase?.id).length} log entries).
               </p>
             </div>
 
-            <button
-              onClick={handleDownloadJSON}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/80 font-mono font-bold text-xs shrink-0 transition-all cursor-pointer shadow-md"
-            >
-              <Download className="w-4 h-4 text-cyan-400" /> Export JSON Archive
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {onOpenGoogleSheets && (
+                <button
+                  onClick={onOpenGoogleSheets}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/80 font-mono font-bold text-xs transition-all cursor-pointer shadow-md"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Google Sheets
+                </button>
+              )}
+              <button
+                onClick={handleDownloadJSON}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/80 font-mono font-bold text-xs transition-all cursor-pointer shadow-md"
+              >
+                <Download className="w-4 h-4 text-cyan-400" /> Export JSON
+              </button>
+            </div>
           </div>
         </div>
       </div>
